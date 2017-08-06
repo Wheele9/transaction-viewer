@@ -1,6 +1,6 @@
 # transaction-viewer
 
-This project contains a python based program, which allows to inspect account history
+This program allows you to inspect your bank account history
 
 ## Backstory
 
@@ -8,22 +8,41 @@ My bank (OTP Bank Nyrt) does not allow to watch my transactions on the internet,
 
 ## Inner workings
 
-The inputs of this program are .csv files exported from my netbank. I parse them using pandas, numpy, and I create the plots using matplotlib. This program is tested on python3.6 on Ubuntu 16.04 and Win7. On Windows it is pretty laggy, I try to solve that.
+The inputs of this program are .csv files exported from my netbank. I parse them using some awesome python packages, like pandas, numpy, and I create the plots using matplotlib. This program is tested on python3.6 on Ubuntu 16.04 and Win7. On Windows it is pretty laggy, I try to solve that.
 
-## Contact
+On the upper plot you can see the whole range of transactions, which were parsed. On the bottom plot you can see the whole range, or a part of it, as you wish. Use the radio buttons to change properties and enjoy :)
 
-Feel free to try it. I uploaded two dummy csv-s to play with. The parser class, and the plotting class are a bit tangled into each other right now. But it's not that hard to write your own parser based on your own csv-s, and with a little modification on the plotting class, it shall work. Contact me if you have any questions.
-
-## Current features
+## Features
 
 ### Zooming
 
-![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/blrFigure_1-1.png)
+You can select with the mouse any period on the upper plot, and zoom into it. The details will be more clear on the bottom plot now.
 
-### Showing attributes of selected transaction
+![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/select.png)
 
-![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/blurredwindow.png)
+### Scale selection
 
-### Scaling can be selected
+You can change between linear and logarithmic view, using the radiobuttons on the right. Try both of them! :)
+
+![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/scales.png)
+
+### Selection between balance view vs transaction view
+
+With the radiobuttins, you can select whether you wanna see the transactions, or your balance on the upper plot. Zooming works in both ways.
+
+![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/balance.png)
+
+### Inspection
+
+On the bottom plot, you can click into any of the rectangles (each of them represents a single transaction), and you can see some
+basic information about this transaction, such as date, sum, comment.
+
+![alt tag](https://github.com/Wheele9/transaction-viewer/blob/master/images/selection.png)
+
+More features are on the way, feel free to suggest one, if you need something.
+
+## Contact
+
+Feel free to try it. If you are not at OTP Bank, you can rewrite the parser class, and things should work.
 
 
