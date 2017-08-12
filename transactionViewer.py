@@ -1,7 +1,6 @@
 # coding: utf-8
 
 
-
 import os
 import inspect
 import datetime
@@ -46,11 +45,14 @@ class otpParser():
             dataFrames = [pd.read_csv(file,  header=None) for file in files]
         except :
             dataFrames = [pd.read_csv(file, sep=';', header=None) for file in files]
+            
+        for df in dataFrames:
+            try:
+                df.drop(df.columns[[13, 14]], axis=1, inplace=True)
+            except:
+                pass
+        
         mergedFrame = pd.concat(dataFrames)
-#         try:
-#             mergedFrame.drop(mergedFrame.columns[[13, 14]], axis=1, inplace=True)
-#         except:
-#             pass
         mergedFrame.columns = self.headers                                        
         mergedFrame = mergedFrame.reset_index(drop=True)
         mergedFrame = mergedFrame.sort_values(by='date')
@@ -64,7 +66,6 @@ class otpParser():
         return (self.mergedFrame.head())
 
 
-
 RED = (0.83921568627450982, 0.15294117647058825, 0.15686274509803921, 1.0)
 DARK_RED = (0.49803921568627452, 0.12156862745098039, 0.12156862745098039, 1.0)
 GREY = (0.5019607843137255, 0.5450980392156862, 0.5882352941176471, 1)
@@ -74,7 +75,6 @@ PURPLE = (0.6666666666666666, 0.6745098039215687 ,0.8862745098039215,1.0)
 LIGHT_GREEN =  (0.1568627450980392, 0.7058823529411765, 0.38823529411764707, 1.0)
 LIGHT_RED = (1.0, 0.2784313725490196, 0.2784313725490196, 1.0)
 LIGHT_GREY = (0.8352941176470589, 0.8470588235294118, 0.8627450980392157,1.0)
-
 
 WIDTH = 12
 G_RAT = (1 + 5 ** 0.5) / 2 # golden ratio
@@ -203,7 +203,7 @@ class financeViewer():
             ## calculate bottom for this iteration
             currBottomIdxs =[]
             indexes = []
-#             expenseX
+
             for idx, day in enumerate(expenseX):
                 if len(np.where(currentRange==day)[0]):
                     currBottomIdxs.append(np.where(currentRange==day)[0][0])
@@ -454,17 +454,15 @@ class financeViewer():
         plt.show()
 
 
-# folder='.'
+
 folder='matyi'
-# folder='reka'
+# folder='.'
+
+
 files =[os.path.join(folder,file) for file in os.listdir(folder) if file.lower().endswith('csv')]
 
 model = otpParser()
 view = financeViewer()
 
 myApp = Presenter(model, view, files)
-
-
-
 myApp.showPlots()
-
