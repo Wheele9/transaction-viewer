@@ -1,6 +1,4 @@
 # coding: utf-8
-
-
 import os
 import inspect
 import datetime
@@ -32,7 +30,6 @@ class Presenter():
     
     def showDataframe(self):
         return self.wholeDf
-
 
 class otpParser():
     
@@ -92,9 +89,14 @@ class financeViewer():
     def __init__(self):
 
         self.box = dict(facecolor='blue', pad=3, alpha=0.2, boxstyle="Round4,pad=0.3")
-        self.testString ="""Date: {}
+        self.transactionString ="""Date: {}
                             Sum: {} HUF
                             Comment: {}"""
+        self.initString = """
+        Select a period to inspect transactions
+        using your mouse, or change the settings
+        """
+        
         self.scale1='log'
         self.scale2='log'
         self.mode = 'transaction' # the other mode is balance mode, modifies the top plot
@@ -127,7 +129,7 @@ class financeViewer():
         self.plotAx2()
         
         ##info plot##
-        self.txt = self.ax3.text(0.1,0.5,self.testString.format('','',''),
+        self.txt = self.ax3.text(0.1,0.5,self.initString,
         horizontalalignment='left',
         verticalalignment='center',
         fontsize=13, color='black',
@@ -160,7 +162,7 @@ class financeViewer():
                     except:
                         comment='Record not found'
 
-                    newStr = self.testString.format(transDate,bar.get_height(), comment)
+                    newStr = self.transactionString.format(transDate,bar.get_height(), comment)
                     self.txt.set_text(newStr)
             else:
                 self.ax2.patches[idx].set_facecolor(dark2normal[bar.get_edgecolor()])
@@ -217,7 +219,8 @@ class financeViewer():
 
             baseArray[currBottomIdxs] += expenseY
             
-        if self.start and self.end-self.start <= 4:
+        if self.start != None and self.end-self.start <= 4:
+            print (333)
             self.ax2.xaxis.set_major_locator(DayLocator())
         
         self.ax2.xaxis.set_major_formatter(DATEFROMAT)
@@ -272,6 +275,7 @@ class financeViewer():
         endDate = yearZero + timedelta(days=dayMax)
         st=str(startDate)[:10]
         nd=str(endDate)[:10]
+
         stIdx, = np.where( self.pdRange.values==np.datetime64(st) )
         endIdx, = np.where( self.pdRange.values==np.datetime64(nd) )
 
@@ -285,6 +289,19 @@ class financeViewer():
                 stIdx , endIdx = stIdx[0], len(self.pdRange)-1
 
         self.start, self.end = stIdx, endIdx
+        
+        ist = int(st.replace("-", ""))
+        ind = int(nd.replace("-", ""))
+
+        selectedBalance = self.balance[(self.dateAxis>ist) & (self.dateAxis< ind)]
+        selectionString = """
+        Selection: {} - {}
+        Starting balance: {} HUF
+        Final balance: {} HUF
+        Difference: {} HUF
+        """.format(st,nd, selectedBalance[0], selectedBalance[-1], selectedBalance[-1]-selectedBalance[0])
+        self.txt.set_text(selectionString)
+
         self.plotAx2()
         self.fig.canvas.draw()
         
@@ -454,13 +471,10 @@ class financeViewer():
         plt.show()
 
 
-
 folder='matyi'
 # folder='.'
 
-
 files =[os.path.join(folder,file) for file in os.listdir(folder) if file.lower().endswith('csv')]
-
 model = otpParser()
 view = financeViewer()
 
