@@ -1,3 +1,4 @@
+
 # coding: utf-8
 
 import os
@@ -18,7 +19,6 @@ from matplotlib.widgets import Button, SpanSelector, RadioButtons
 from matplotlib.dates import num2date, DayLocator
 
 
-
 class Presenter():
     
     def __init__(self, model, view, files):
@@ -34,6 +34,42 @@ class Presenter():
         return self.wholeDf
 
 
+class otpParser():
+    
+    def __init__(self):
+        self.headers = ['accountNr', 'T/J', 'sum', 'currency', 'date', 'date2', 'balance', 'noIdea',
+                   'noIdea2', 'comment', 'noIdea3', 'noIdea4', 'comment2']
+        
+    def parseFiles(self, files):
+        dataFrames=[]
+        
+        for file in files:
+            try:
+                dataFrame = pd.read_csv(file,  header=None)
+            except :
+                dataFrame = pd.read_csv(file, sep=';', header=None)
+            dataFrames.append(dataFrame)
+        for df in dataFrames:
+            try:
+                df.drop(df.columns[[13, 14]], axis=1, inplace=True)
+            except:
+                pass
+        
+        mergedFrame = pd.concat(dataFrames)
+        mergedFrame.columns = self.headers                                        
+        mergedFrame = mergedFrame.reset_index(drop=True)
+        mergedFrame = mergedFrame.sort_values(by='date')
+        mergedFrame['comment'] = mergedFrame['comment'].replace(np.nan, '', regex=True)
+        mergedFrame['comment'] = mergedFrame['comment'].apply((lambda x: ' '.join(x.split())))
+        mergedFrame.loc[mergedFrame['comment']=='','comment'] = mergedFrame.loc[(mergedFrame["comment"] == '') , "comment2"]
+        cleanDf = mergedFrame.loc[:,['sum', 'date', 'comment','balance']]
+        self.df = mergedFrame
+        return cleanDf, mergedFrame
+
+    def printDf(self):
+        return self.df
+
+
 RED = (0.83921568627450982, 0.15294117647058825, 0.15686274509803921, 1.0)
 DARK_RED = (0.49803921568627452, 0.12156862745098039, 0.12156862745098039, 1.0)
 GREY = (0.5019607843137255, 0.5450980392156862, 0.5882352941176471, 1)
@@ -44,6 +80,7 @@ LIGHT_GREEN =  (0.1568627450980392, 0.7058823529411765, 0.38823529411764707, 1.0
 LIGHT_RED = (1.0, 0.2784313725490196, 0.2784313725490196, 1.0)
 LIGHT_GREY = (0.8352941176470589, 0.8470588235294118, 0.8627450980392157,1.0)
 
+# width = 0.3
 WIDTH = 12
 G_RAT = (1 + 5 ** 0.5) / 2 # golden ratio
 LABEL_ROTATION = 15 # DEGREES
@@ -250,14 +287,18 @@ class financeViewer():
         stIdx, = np.where( self.pdRange.values==np.datetime64(st) )
         endIdx, = np.where( self.pdRange.values==np.datetime64(nd) )
 
-        try:
+        if stIdx and endIdx: 
             stIdx , endIdx = stIdx[0], endIdx[0]
-        except:
-            try:
-                stIdx , endIdx = 0, endIdx[0]
-
-            except:
-                stIdx , endIdx = stIdx[0], len(self.pdRange)-1
+            # start and endpoints in of range
+        elif stIdx:
+            stIdx , endIdx = stIdx[0], len(self.pdRange)-1
+            # endpoint out of range
+        elif endIdx:
+            stIdx , endIdx = 0, endIdx[0]
+            # startpoint out of range           
+        else:
+            # start and endpoints are out of range ")
+            return
 
         self.start, self.end = stIdx, endIdx
         
@@ -441,48 +482,16 @@ class financeViewer():
 
         plt.show()
 
-
-class otpParser():
-    
-    def __init__(self):
-        self.headers = ['accountNr', 'T/J', 'sum', 'currency', 'date', 'date2', 'balance', 'noIdea',
-                   'noIdea2', 'comment', 'noIdea3', 'noIdea4', 'comment2']
-        
-    def parseFiles(self, files):
-        dataFrames=[]
-        
-        for file in files:
-            try:
-                dataFrame = pd.read_csv(file,  header=None)
-            except :
-                dataFrame = pd.read_csv(file, sep=';', header=None)
-            dataFrames.append(dataFrame)
-        for df in dataFrames:
-            try:
-                df.drop(df.columns[[13, 14]], axis=1, inplace=True)
-            except:
-                pass
-        
-        mergedFrame = pd.concat(dataFrames)
-        mergedFrame.columns = self.headers                                        
-        mergedFrame = mergedFrame.reset_index(drop=True)
-        mergedFrame = mergedFrame.sort_values(by='date')
-        mergedFrame['comment'] = mergedFrame['comment'].replace(np.nan, '', regex=True)
-        mergedFrame['comment'] = mergedFrame['comment'].apply((lambda x: ' '.join(x.split())))
-        mergedFrame.loc[mergedFrame['comment']=='','comment'] = mergedFrame.loc[(mergedFrame["comment"] == '') , "comment2"]
-        cleanDf = mergedFrame.loc[:,['sum', 'date', 'comment','balance']]
-        self.df = mergedFrame
-        return cleanDf, mergedFrame
-
-    def printDf(self):
-        return self.df
-
-
 folder='matyi'
+# folder='.'
+
 files =[os.path.join(folder,file) for file in os.listdir(folder) if file.lower().endswith('csv')]
 
 model = otpParser()
 view = financeViewer()
 
 myApp = Presenter(model, view, files)
+
 myApp.showPlots()
+
+
